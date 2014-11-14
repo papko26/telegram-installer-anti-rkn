@@ -25,7 +25,8 @@ cd ./Telegram
 echo "Copying new files..."
 sudo cp ./Updater /usr/share/telegram/Updater
 sudo cp ./Telegram /usr/share/telegram/Telegram
-
+user=$(whoami)
+sudo chown -R $user:$user /usr/share/telegram/.
 
 echo "Making desktop files..."
 
