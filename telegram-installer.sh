@@ -1,21 +1,21 @@
 #!/bin/bash
 
-echo "============================================="
-echo "==     Telegram Script Installer v 0.1     =="
-echo "==                                         =="
-echo "==            by Jalcaldea                 =="
-echo "============================================="
+echo "=============================="
+echo "Credits to Jalcaldea."
+echo "This version is for russian users, who are having an issues while loading telegram binary, because of RKN censorship."
+echo "On another hand, I am not creating desktop file, but creating symlink from updater to /usr/sbin/ named as 'telegram' "
+echo "=============================="
+echo ""
+echo "I need to use superuser priveleges to get acces for /usr/share and /usr/sbin:"
+sudo mkdir -p /usr/share/telegram
 
+last_release=$(curl --silent "https://api.github.com/repos/telegramdesktop/tdesktop/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+last_release_num=$(echo $last_release | tr -d "v")
+load_link="https://github.com/telegramdesktop/tdesktop/releases/download/$last_release/tsetup.$last_release_num.tar.xz"
 echo "Downloading necesary files..."
 
 cd /tmp
-wget -O - https://tdesktop.com/linux > tsetup.tar.gz
-wget -O - https://raw.githubusercontent.com/telegramdesktop/tdesktop/master/Telegram/Telegram/Images.xcassets/Icon.iconset/icon_256x256@2x.png > icon.png
-
-echo "Making destination folder..."
-
-sudo mkdir /usr/share/telegram
-sudo chmod +x /usr/share/telegram
+wget -q -O - $load_link > tsetup.tar.gz
 
 echo "Extracting files..."
 
@@ -25,35 +25,17 @@ cd ./Telegram
 echo "Copying new files..."
 sudo cp ./Updater /usr/share/telegram/Updater
 sudo cp ./Telegram /usr/share/telegram/Telegram
-user=$(whoami)
-sudo chown -R $user:$user /usr/share/telegram/.
+sudo chmod a+x /usr/share/telegram/Telegram
+sudo chmod a+x /usr/share/telegram/Updater
 
-echo "Making desktop files..."
+echo "Making symlink..."
+sudo ln -s /usr/share/telegram/Updater /usr/sbin/telegram
 
 cd /tmp
-
-sudo echo "[Desktop Entry]" > telegram.desktop
-sudo echo "Name=Telegram" >> telegram.desktop
-sudo echo "GenericName=Chat" >> telegram.desktop
-sudo echo "Comment=Chat with yours friends" >> telegram.desktop
-sudo echo "Exec=/usr/share/telegram/Telegram" >> telegram.desktop
-sudo echo "Terminal=false" >> telegram.desktop
-sudo echo "Type=Application" >> telegram.desktop
-sudo echo "Icon=/usr/share/telegram/icon.png" >> telegram.desktop
-sudo echo "Categories=Network;Chat;" >> telegram.desktop
-sudo echo "StartupNotify=false" >> telegram.desktop
-
-sudo cp icon.png /usr/share/telegram/icon.png
-sudo cp telegram.desktop /usr/share/applications/telegram.desktop
-
 echo "Removing old files..."
 
 rm /tmp/tsetup.tar.gz
-rm /tmp/icon.png
-rm /tmp/telegram.desktop
 rm -R /tmp/Telegram
 
 
-echo "Installation Complete! Launching Telegram..."
-
-/usr/share/telegram/Updater &
+echo "Installation Complete! call 'telegram' to start it"
